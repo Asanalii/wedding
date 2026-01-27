@@ -7,6 +7,8 @@ import CountdownTimer from "./components/CountdownTimer.vue";
 import RsvpForm from "./components/RsvpForm.vue";
 import LocationBlock from "./components/LocationBlock.vue";
 import InvitationDetails from "./components/InvitationDetails.vue";
+import DressCodeBlock from "./components/DressCodeBlock.vue";
+import GuestFormBlock from "./components/GuestFormBlock.vue";
 
 // import MusicPlayer from "@/components/MusicPlayer.vue";
 // import HeroSection from "@/components/HeroSection.vue";
@@ -36,6 +38,10 @@ import InvitationDetails from "./components/InvitationDetails.vue";
       location-name='"Resident Ballroom" мейрамханасы'
       location-address="Желтоқсан көшесі 23, Алматы қ."
     />
+
+    <DressCodeBlock />
+
+    <GuestFormBlock :event-iso="config.eventDateTime" />
 
     <SectionBlock title="Таймер">
       <CountdownTimer :target-iso="config.eventDateTime" />

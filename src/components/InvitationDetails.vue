@@ -2,6 +2,7 @@
 import { computed } from "vue";
 
 import whiteFlowersImage from "@/assets/images/white_flowers.webp";
+import twoGisImage from "@/assets/images/2gis.webp";
 
 const props = defineProps({
   eventIso: { type: String, required: true },
@@ -16,6 +17,12 @@ const props = defineProps({
   locationAddress: { type: String, default: "Желтоқсан көшесі 23, Алматы қ." },
 
   flowerImage: { type: String, default: whiteFlowersImage },
+
+  twoGisImage: { type: String, default: twoGisImage },
+  twoGisLink: {
+    type: String,
+    default: "https://2gis.kz/taraz/firm/70000001090131741",
+  },
 });
 
 const weekdays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
@@ -168,6 +175,15 @@ const calendarCells = computed(() => {
           <div>{{ locationAddress }}</div>
         </div>
 
+        <a
+          class="address__2gisLink"
+          :href="twoGisLink"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img class="address__2gisIcon" :src="twoGisImage" alt="2GIS" />
+        </a>
+
         <img class="address__flower" :src="flowerImage" alt="" />
         <!-- <div class="address__flower" aria-hidden="true"></div> -->
       </div>
@@ -316,14 +332,27 @@ const calendarCells = computed(() => {
 }
 
 .address__flower {
-  width: min(240px, 62vw); /* было 320px/80vw */
+  width: min(400px, 50vw);
+  max-width: 310px;
   height: auto;
-  margin: 16px auto 0;
+  margin: 0 auto;
   display: block;
   opacity: 0.95;
   user-select: none;
   pointer-events: none;
+  transform: scale(1.06);
+  transform-origin: center;
 }
+
+/* .address__flower {
+  width: min(210px, 54vw);
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  opacity: 0.95;
+  user-select: none;
+  pointer-events: none;
+} */
 
 .calendar__day {
   height: 34px;
@@ -353,6 +382,21 @@ const calendarCells = computed(() => {
   transform-origin: center;
 }
 
+.address__2gisLink {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 14px;
+  text-decoration: none;
+}
+
+.address__2gisIcon {
+  width: 120px;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+
 /* пульсация */
 @keyframes heartPulse {
   0% {
@@ -364,5 +408,13 @@ const calendarCells = computed(() => {
   100% {
     transform: translateX(-50%) scale(1);
   }
+}
+
+.address__2gisLink:hover .address__2gisIcon {
+  transform: scale(1.04);
+}
+
+.address__2gisIcon {
+  transition: transform 180ms ease;
 }
 </style>
