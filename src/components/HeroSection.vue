@@ -11,7 +11,6 @@ const props = defineProps({
   city: { type: String, default: "АЛМАТЫ Қ." },
   eventIso: { type: String, required: true },
 
-  // ✅ музыка
   musicUrl: { type: String, required: true },
 });
 
