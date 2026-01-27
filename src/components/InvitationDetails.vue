@@ -90,11 +90,11 @@ const calendarCells = computed(() => {
       <!-- Заголовок -->
       <div class="details__titleWrap">
         <div class="details__line"></div>
-        <h2 class="details__title">{{ title }}</h2>
+        <h2 class="details__title invite-title">{{ title }}</h2>
       </div>
 
       <!-- Текст приглашения -->
-      <p class="details__text">
+      <p class="details__text kz-text">
         {{ invitationText }}
       </p>
 
@@ -169,8 +169,10 @@ const calendarCells = computed(() => {
 
       <!-- Адрес -->
       <div class="address">
-        <h3 class="address__title">{{ locationTitle }}</h3>
-        <div class="address__text">
+        <h3 class="address__title invite-title kz-title">
+          {{ locationTitle }}
+        </h3>
+        <div class="address__text kz-text">
           <div>{{ locationName }}</div>
           <div>{{ locationAddress }}</div>
         </div>
@@ -222,7 +224,7 @@ const calendarCells = computed(() => {
   margin: 0;
   font-size: 28px;
   letter-spacing: 1px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
 }
 
 /* Текст приглашения */
@@ -322,7 +324,7 @@ const calendarCells = computed(() => {
   margin: 0 0 10px;
   font-size: 28px;
   letter-spacing: 1px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
 }
 
 .address__text {

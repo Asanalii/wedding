@@ -23,4 +23,9 @@ export const invitationConfig = {
     deadline: "ЖАУАБЫН 31.01 ДЕЙІН КҮТЕМІЗ!",
     success: "Кездескенше!",
   },
+
+  final: {
+    topText: "ҚҰРМЕТПЕН, ТОЙ ИЕЛЕРІ",
+    namesText: "Асанәлі - Асан",
+  },
 };

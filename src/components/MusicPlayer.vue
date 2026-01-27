@@ -43,9 +43,9 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="music">
-    <button class="btn" type="button" @click="toggle">
+    <!-- <button class="btn" type="button" @click="toggle">
       {{ isPlaying ? "STOP" : "PLAY" }}
-    </button>
+    </button> -->
   </div>
 </template>
 

@@ -115,15 +115,15 @@ const showNextImage = () => {
   <section class="guestForm" :style="{ '--bg': `url('${backgroundImage}')` }">
     <div class="guestForm__overlay">
       <div class="guestForm__container">
-        <h2 class="guestForm__title">{{ title }}</h2>
+        <h2 class="guestForm__title kz-title">{{ title }}</h2>
 
-        <p class="guestForm__subtitle">
+        <p class="guestForm__subtitle kz-subtitle">
           <span v-for="(line, index) in subtitle.split('\n')" :key="index">
             {{ line }}<br v-if="index < subtitle.split('\n').length - 1" />
           </span>
         </p>
 
-        <div class="guestForm__deadline">{{ deadlineText }}</div>
+        <div class="guestForm__deadline kz-text">{{ deadlineText }}</div>
 
         <form class="guestForm__form" @submit.prevent="submitForm">
           <label class="guestForm__label">
@@ -201,8 +201,8 @@ const showNextImage = () => {
         </form>
 
         <div class="guestForm__note">
-          <div class="guestForm__noteTitle">{{ noteTitle }}</div>
-          <div class="guestForm__noteText">
+          <div class="guestForm__noteTitle kz-title">{{ noteTitle }}</div>
+          <div class="guestForm__noteText kz-text">
             <span v-for="(line, index) in noteText.split('\n')" :key="index">
               {{ line }}<br v-if="index < noteText.split('\n').length - 1" />
             </span>
@@ -297,7 +297,6 @@ const showNextImage = () => {
   margin: 0 0 14px;
   font-size: 34px;
   letter-spacing: 1px;
-  font-family: Georgia, "Times New Roman", serif;
 }
 
 .guestForm__subtitle {
@@ -400,9 +399,7 @@ const showNextImage = () => {
 }
 
 .guestForm__noteTitle {
-  font-family: Georgia, "Times New Roman", serif;
   font-size: 44px;
-  margin-bottom: 6px;
 }
 
 .guestForm__noteText {

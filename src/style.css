@@ -1,4 +1,220 @@
+/* =========================
+   Base Reset + Variables
+   ========================= */
+
+:root {
+  --page-bg: #ffffff;
+  --text-color: #111111;
+
+  /* твои блоки */
+  --cream-bg: #f6f0e6;
+
+  /* размеры */
+  --page-max: 980px;
+  --radius: 18px;
+
+  /* UI */
+  --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.12);
+  --border-soft: 1px solid rgba(0, 0, 0, 0.12);
+
+  /* для формы */
+  --white-80: rgba(255, 255, 255, 0.8);
+  --white-12: rgba(255, 255, 255, 0.12);
+
+  color-scheme: light;
+
+  --font-sans:
+    "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-serif: "Noto Serif", Georgia, "Times New Roman", serif;
+
+  --font-title: "Cinzel", "Times New Roman", serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
 html {
-  padding: 0;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
   margin: 0;
+  font-family: var(--font-sans);
+  color: var(--text-color);
+  background: var(--page-bg);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  min-height: 100%;
+}
+
+/* =========================
+   Typography
+   ========================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* =========================
+   Media
+   ========================= */
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+/* =========================
+   Forms
+   ========================= */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+input,
+textarea,
+select {
+  outline: none;
+}
+
+/* убираем дефолтные стили iOS у инпутов */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* =========================
+   Links
+   ========================= */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================
+   Useful Utilities
+   ========================= */
+
+.container {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.section {
+  padding: 44px 16px;
+}
+
+.card {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  background: #fff;
+}
+
+/* =========================
+   Selection / Scrollbar (optional)
+   ========================= */
+
+::selection {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.kz-title {
+  font-family: var(--font-serif);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.kz-subtitle {
+  font-family: var(--font-sans);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
+.kz-text {
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+.invite-title {
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-wide);
+  font-weight: 600;
+}
+
+.invite-title--big {
+  font-size: clamp(26px, 4.2vw, 36px);
+}
+
+.invite-title--mid {
+  font-size: clamp(22px, 3.8vw, 30px);
+}
+
+.invite-subtitle {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-medium);
+  font-weight: 500;
+  opacity: 0.95;
+  font-size: 13px;
+}
+
+.invite-line {
+  width: 160px;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.45);
+  margin: 0 auto;
 }

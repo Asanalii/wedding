@@ -19,12 +19,12 @@ const props = defineProps({
 <template>
   <section class="dress">
     <div class="dress__container">
-      <h3 class="dress__title">{{ title }}</h3>
+      <h3 class="dress__title invite-title">{{ title }}</h3>
 
       <div class="dress__grid">
         <div class="dress__item">
           <img class="dress__icon" :src="menImage" alt="" />
-          <div class="dress__text">
+          <div class="dress__text kz-text">
             <div class="dress__label">{{ menTitle }}</div>
             <div class="dress__desc">
               <span v-for="(line, index) in menText.split('\n')" :key="index">
@@ -66,7 +66,7 @@ const props = defineProps({
   margin: 0 0 22px;
   font-size: 28px;
   letter-spacing: 1px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
 }
 
 .dress__grid {
@@ -92,7 +92,6 @@ const props = defineProps({
 
 .dress__label {
   font-weight: 700;
-  margin-bottom: 6px;
   font-size: 14px;
 }
 

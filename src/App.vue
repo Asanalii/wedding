@@ -9,6 +9,7 @@ import LocationBlock from "./components/LocationBlock.vue";
 import InvitationDetails from "./components/InvitationDetails.vue";
 import DressCodeBlock from "./components/DressCodeBlock.vue";
 import GuestFormBlock from "./components/GuestFormBlock.vue";
+import FinalThanksBlock from "./components/FinalThanksBlock.vue";
 
 // import MusicPlayer from "@/components/MusicPlayer.vue";
 // import HeroSection from "@/components/HeroSection.vue";
@@ -25,10 +26,20 @@ import GuestFormBlock from "./components/GuestFormBlock.vue";
     <HeroSection
       :cover-desktop="config.cover.desktop"
       :cover-mobile="config.cover.mobile"
+      :event-iso="config.eventDateTime"
+      subtitle="WEDDING CEREMONY"
+      couple-names="DANIYAR & AMANAT"
+      city="АЛМАТЫ Қ."
+      :music-url="config.musicUrl"
+    />
+
+    <!-- <HeroSection
+      :cover-desktop="config.cover.desktop"
+      :cover-mobile="config.cover.mobile"
       :subtitle="config.subtitle"
       :couple-names="config.coupleNames"
       :event-iso="config.eventDateTime"
-    />
+    /> -->
 
     <InvitationDetails
       :event-iso="config.eventDateTime"
@@ -43,26 +54,31 @@ import GuestFormBlock from "./components/GuestFormBlock.vue";
 
     <GuestFormBlock :event-iso="config.eventDateTime" />
 
-    <SectionBlock title="Таймер">
+    <!-- <SectionBlock title="Таймер">
       <CountdownTimer :target-iso="config.eventDateTime" />
-    </SectionBlock>
+    </SectionBlock> -->
 
-    <SectionBlock title="Локация">
+    <!-- <SectionBlock title="Локация">
       <LocationBlock
         :place-name="config.location.placeName"
         :address="config.location.address"
         :map-embed-url="config.location.mapEmbedUrl"
       />
-    </SectionBlock>
+    </SectionBlock> -->
 
-    <SectionBlock :title="config.rsvp.title">
+    <!-- <SectionBlock :title="config.rsvp.title">
       <RsvpForm
         :deadline-text="config.rsvp.deadline"
         :success-text="config.rsvp.success"
       />
-    </SectionBlock>
+    </SectionBlock> -->
 
-    <footer class="footer">Made with ❤️</footer>
+    <FinalThanksBlock
+      :top-text="config.final.topText"
+      :names-text="config.final.namesText"
+    />
+
+    <!-- <footer class="footer">Made with ❤️</footer> -->
   </div>
 </template>
 
