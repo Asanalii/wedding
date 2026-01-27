@@ -3,8 +3,8 @@ export const invitationConfig = {
   subtitle: "Wedding Ceremony",
 
   cover: {
-    desktop: "/src/assets/images/cover-desktop.png",
-    mobile: "/src/assets/images/cover-mobile.png",
+    desktop: new URL("@/assets/images/cover-desktop.png", import.meta.url).href,
+    mobile: new URL("@/assets/images/cover-mobile.png", import.meta.url).href,
   },
 
   eventDateTime: "2026-01-31T17:00:00+05:00", // UTC+5 (Астана)
