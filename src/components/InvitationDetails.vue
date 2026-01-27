@@ -23,6 +23,7 @@ const weekdays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 const eventDate = computed(() => new Date(props.eventIso));
 
 const dayNumber = computed(() => eventDate.value.getDate());
+const dayNumberValue = computed(() => dayNumber.value);
 const monthIndex = computed(() => eventDate.value.getMonth()); // 0..11
 const year = computed(() => String(eventDate.value.getFullYear()));
 
@@ -123,14 +124,35 @@ const calendarCells = computed(() => {
               :key="dayIndex"
               class="calendar__day"
               :class="{
-                'calendar__day--empty': !dayItem,
-                'calendar__day--selected': dayItem === dayNumber,
+                'calendar__day--empty': dayItem === null,
+                'calendar__day--selected': dayItem === dayNumberValue,
               }"
             >
-              <span v-if="dayItem" class="calendar__dayNumber">{{
-                dayItem
-              }}</span>
-              <span v-if="dayItem === dayNumber" class="calendar__heart"></span>
+              <span v-if="dayItem !== null" class="calendar__dayNumber">
+                {{ dayItem }}
+              </span>
+
+              <!-- Сердечко-рамка (как на скрине) -->
+              <svg
+                v-if="dayItem === dayNumberValue"
+                class="calendar__heartFrame"
+                viewBox="0 0 64 58"
+                aria-hidden="true"
+              >
+                <path
+                  d="M32 54
+           C 18 44, 6 35, 6 22
+           C 6 12, 14 6, 22 6
+           C 27 6, 30 9, 32 12
+           C 34 9, 37 6, 42 6
+           C 50 6, 58 12, 58 22
+           C 58 35, 46 44, 32 54 Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </div>
           </div>
         </div>
@@ -279,26 +301,6 @@ const calendarCells = computed(() => {
   z-index: 2;
 }
 
-/* Сердечко-обводка как на скрине */
-.calendar__day--selected .calendar__heart {
-  position: absolute;
-  width: 34px;
-  height: 30px;
-  border: 1px solid rgba(0, 0, 0, 0.75);
-  border-top: 0;
-  border-radius: 12px 12px 18px 18px;
-  transform: rotate(0deg);
-  bottom: 1px;
-  z-index: 1;
-  clip-path: path(
-    "M17 29 C6 21 1 16 1 10 C1 4 6 1 10 1 C13 1 15 3 17 6 C19 3 21 1 24 1 C28 1 33 4 33 10 C33 16 28 21 17 29 Z"
-  );
-}
-
-.calendar__day--selected .calendar__heart {
-  border: 1.6px solid rgba(0, 0, 0, 0.9);
-}
-
 /* Адрес */
 .address__title {
   margin: 0 0 10px;
@@ -321,5 +323,46 @@ const calendarCells = computed(() => {
   opacity: 0.95;
   user-select: none;
   pointer-events: none;
+}
+
+.calendar__day {
+  height: 34px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  font-size: 14px;
+}
+
+.calendar__dayNumber {
+  position: relative;
+  z-index: 2; /* цифра поверх рамки */
+}
+
+/* рамка-сердце вокруг числа */
+.calendar__heartFrame {
+  position: absolute;
+  width: 34px;
+  height: 30px;
+  left: 50%;
+  bottom: 1px;
+  transform: translateX(-50%);
+  color: rgba(0, 0, 0, 0.85);
+  z-index: 1;
+  pointer-events: none;
+  animation: heartPulse 1.6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* пульсация */
+@keyframes heartPulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.18);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
 }
 </style>

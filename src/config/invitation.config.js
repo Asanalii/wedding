@@ -10,7 +10,7 @@ export const invitationConfig = {
   eventDateTime: "2026-01-31T17:00:00+05:00", // UTC+5 (Астана)
 
   musicUrl:
-    "https://dl.dropbox.com/scl/fi/9qxv4dcijmettcvl3dq78/Ed-Sheeran-Perfect.mp3?rlkey=3a16uy76a97qo0d9xq3vhrx5s&dl=1",
+    "https://dl.dropboxusercontent.com/s/agxcxm6pef0zkth/Ed%20Sheeran%20-%20Perfect%20%28Piano%29%20%28minus%205%29.mp3?st=6zhvreap&dl=0",
 
   location: {
     placeName: "Мейрамхана",
