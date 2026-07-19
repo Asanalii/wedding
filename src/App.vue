@@ -72,6 +72,8 @@ const config = computed(() => getConfig(lang));
       :note-text="config.rsvp.noteText"
       :countdown-label="config.countdown.label"
       :countdown-units="config.countdown.units"
+      :error-text="config.rsvp.error"
+      :lang="config.lang"
     />
 
     <FinalThanksBlock

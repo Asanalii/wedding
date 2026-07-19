@@ -31,6 +31,11 @@ const props = defineProps({
     type: Object,
     default: () => ({ days: "күн", hours: "сағат", minutes: "минут", seconds: "секунд" }),
   },
+  lang: { type: String, default: "kk" },
+  errorText: {
+    type: String,
+    default: "Қате шықты. Қайталап көріңіз.",
+  },
 });
 
 const guestFullName = ref("");
@@ -38,6 +43,7 @@ const partnerName = ref("");
 const attendance = ref("yes");
 const isSubmitting = ref(false);
 const isSent = ref(false);
+const isError = ref(false);
 
 const needsPartner = computed(() => attendance.value === "with_partner");
 const partnerError = computed(
@@ -47,21 +53,53 @@ const partnerError = computed(
 const nowMs = ref(Date.now());
 let timerId = null;
 
+// URL Google Apps Script из .env (VITE_SHEETS_URL)
+const SHEETS_URL = import.meta.env.VITE_SHEETS_URL;
+
+// Человекочитаемый вариант выбора для таблицы
+const attendanceText = () => {
+  if (attendance.value === "yes") return props.optionYes;
+  if (attendance.value === "with_partner") return props.optionWithPartner;
+  return props.optionNo;
+};
+
 const submitForm = async () => {
   if (!guestFullName.value.trim()) return;
   if (partnerError.value) return;
 
   isSubmitting.value = true;
   isSent.value = false;
+  isError.value = false;
 
-  // TODO: подключить реальную отправку (Telegram / Sheets / backend)
-  await new Promise((resolve) => setTimeout(resolve, 700));
+  const payload = {
+    name: guestFullName.value.trim(),
+    partner: partnerName.value.trim(),
+    attendance: attendanceText(),
+    lang: props.lang,
+  };
 
-  isSubmitting.value = false;
-  isSent.value = true;
-  guestFullName.value = "";
-  partnerName.value = "";
-  attendance.value = "yes";
+  try {
+    if (!SHEETS_URL) throw new Error("SHEETS_URL is not set");
+
+    // no-cors: Apps Script не отдаёт CORS-заголовки, поэтому ответ
+    // прочитать нельзя, но запрос доходит и строка записывается.
+    await fetch(SHEETS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+    });
+
+    isSent.value = true;
+    guestFullName.value = "";
+    partnerName.value = "";
+    attendance.value = "yes";
+  } catch (err) {
+    console.error("RSVP submit failed:", err);
+    isError.value = true;
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const timeLeft = computed(() => {
@@ -200,6 +238,11 @@ const showNextImage = () => {
               <transition name="fade">
                 <div v-if="isSent" class="sent">
                   {{ sentText }}
+                </div>
+              </transition>
+              <transition name="fade">
+                <div v-if="isError" class="sent sent--error">
+                  {{ errorText }}
                 </div>
               </transition>
             </form>
@@ -416,6 +459,7 @@ const showNextImage = () => {
   color: var(--gold-deep);
   padding: 6px;
 }
+.sent--error { color: #c0603f; }
 
 .note {
   margin-top: 30px;
