@@ -18,10 +18,18 @@ const props = defineProps({
   optionWithPartner: { type: String, default: "Жұбайыммен келемін" },
   optionNo: { type: String, default: "Келмеймін" },
   buttonText: { type: String, default: "Жіберу" },
+  sendingText: { type: String, default: "Жіберілуде…" },
+  sentText: { type: String, default: "{{ sentText }}" },
+  partnerHint: { type: String, default: "{{ partnerHint }}" },
   noteTitle: { type: String, default: "Өтініш" },
   noteText: {
     type: String,
     default: "Мобилографтарыңызды үйлеріңізге қалдырып кетіңіздер!",
+  },
+  countdownLabel: { type: String, default: "Тойдың басталуына дейін" },
+  countdownUnits: {
+    type: Object,
+    default: () => ({ days: "күн", hours: "сағат", minutes: "минут", seconds: "секунд" }),
   },
 });
 
@@ -98,26 +106,26 @@ const showNextImage = () => {
       <div class="rsvp__container">
         <!-- Countdown -->
         <div class="countdown">
-          <div class="countdown__label t-caps">Тойдың басталуына дейін</div>
+          <div class="countdown__label t-caps">{{ countdownLabel }}</div>
           <div class="countdown__row">
             <div class="countdown__item">
               <div class="countdown__value">{{ pad(timeLeft.days) }}</div>
-              <div class="countdown__unit">күн</div>
+              <div class="countdown__unit">{{ countdownUnits.days }}</div>
             </div>
             <span class="countdown__sep">:</span>
             <div class="countdown__item">
               <div class="countdown__value">{{ pad(timeLeft.hours) }}</div>
-              <div class="countdown__unit">сағат</div>
+              <div class="countdown__unit">{{ countdownUnits.hours }}</div>
             </div>
             <span class="countdown__sep">:</span>
             <div class="countdown__item">
               <div class="countdown__value">{{ pad(timeLeft.minutes) }}</div>
-              <div class="countdown__unit">минут</div>
+              <div class="countdown__unit">{{ countdownUnits.minutes }}</div>
             </div>
             <span class="countdown__sep">:</span>
             <div class="countdown__item">
               <div class="countdown__value">{{ pad(timeLeft.seconds) }}</div>
-              <div class="countdown__unit">секунд</div>
+              <div class="countdown__unit">{{ countdownUnits.seconds }}</div>
             </div>
           </div>
         </div>
@@ -160,7 +168,7 @@ const showNextImage = () => {
                 <input v-model.trim="partnerName" class="field__input"
                   type="text" :class="{ 'field__input--error': partnerError }" />
                 <span v-if="partnerError" class="field__hint">
-                  Жұбайыңыздың есімін жазыңыз
+                  {{ partnerHint }}
                 </span>
               </label>
 
@@ -186,12 +194,12 @@ const showNextImage = () => {
               </div>
 
               <button class="submit" type="submit" :disabled="isSubmitting">
-                {{ isSubmitting ? "Жіберілуде…" : buttonText }}
+                {{ isSubmitting ? sendingText : buttonText }}
               </button>
 
               <transition name="fade">
                 <div v-if="isSent" class="sent">
-                  Рақмет! Жауабыңыз қабылданды ✓
+                  {{ sentText }}
                 </div>
               </transition>
             </form>

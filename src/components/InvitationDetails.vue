@@ -18,13 +18,21 @@ const props = defineProps({
   flowerImage: { type: String, default: whiteFlowersImage },
   twoGisImage: { type: String, default: twoGisImage },
   twoGisLink: { type: String, default: "https://2gis.kz/almaty" },
+  mapText: { type: String, default: "Картадан қарау" },
+  months: {
+    type: Array,
+    default: () => [
+      "қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым",
+      "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан",
+    ],
+  },
+  weekdays: {
+    type: Array,
+    default: () => ["ДҮЙ", "СЕЙ", "СӘР", "БЕЙ", "ЖҰМ", "СЕН", "ЖЕК"],
+  },
 });
 
-const weekdays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
-const kzMonths = [
-  "қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым",
-  "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан",
-];
+const kzMonths = computed(() => props.months);
 
 const eventDate = computed(() => new Date(props.eventIso));
 const dayNumber = computed(() => eventDate.value.getDate());
@@ -98,7 +106,7 @@ const calendarCells = computed(() => {
               rel="noopener noreferrer"
             >
               <span class="address__mapPin">◍</span>
-              <span>Картадан қарау</span>
+              <span>{{ mapText }}</span>
             </a>
           </div>
         </div>
