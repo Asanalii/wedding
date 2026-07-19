@@ -9,10 +9,16 @@ const props = defineProps({
   eventIso: { type: String, required: true },
   backgroundImage: { type: String, default: tableBlurImage },
   title: { type: String, default: "ҚОНАҚ АНКЕТАСЫ" },
-  subtitle: { type: String, default: "ТОЙҒА ҚАТЫСУЫҢЫЗДЫ РАСТАУЫҢЫЗДЫ СҰРАЙМЫЗ!" },
+  subtitle: {
+    type: String,
+    default: "ТОЙҒА ҚАТЫСУЫҢЫЗДЫ РАСТАУЫҢЫЗДЫ СҰРАЙМЫЗ!",
+  },
   deadlineText: { type: String, default: "ЖАУАБЫН 20.01 ДЕЙІН КҮТЕМІЗ!" },
   nameLabel: { type: String, default: "Сіздің аты-жөніңіз" },
-  partnerLabel: { type: String, default: "Жұбайыңыздың есімі (егер келетін болса)" },
+  partnerLabel: {
+    type: String,
+    default: "Жұбайыңыздың есімі (егер келетін болса)",
+  },
   attendanceLabel: { type: String, default: "Тойға келесіз бе?" },
   optionYes: { type: String, default: "Иә, келемін" },
   optionWithPartner: { type: String, default: "Жұбайыммен келемін" },
@@ -29,7 +35,12 @@ const props = defineProps({
   countdownLabel: { type: String, default: "Тойдың басталуына дейін" },
   countdownUnits: {
     type: Object,
-    default: () => ({ days: "күн", hours: "сағат", minutes: "минут", seconds: "секунд" }),
+    default: () => ({
+      days: "күн",
+      hours: "сағат",
+      minutes: "минут",
+      seconds: "секунд",
+    }),
   },
   lang: { type: String, default: "kk" },
   errorText: {
@@ -56,11 +67,46 @@ let timerId = null;
 // URL Google Apps Script из .env (VITE_SHEETS_URL)
 const SHEETS_URL = import.meta.env.VITE_SHEETS_URL;
 
+// Telegram из .env (бот только отправляет — сервер не нужен)
+const TG_TOKEN = import.meta.env.VITE_TG_TOKEN;
+const TG_CHAT_ID = import.meta.env.VITE_TG_CHAT_ID;
+
 // Человекочитаемый вариант выбора для таблицы
 const attendanceText = () => {
   if (attendance.value === "yes") return props.optionYes;
   if (attendance.value === "with_partner") return props.optionWithPartner;
   return props.optionNo;
+};
+
+// Отправка уведомления в Telegram. Ошибки тут не критичны:
+// главное — запись в таблицу, поэтому глушим их отдельно.
+const sendTelegram = async (data) => {
+  if (!TG_TOKEN || !TG_CHAT_ID) return;
+
+  const langFlag = { kk: "🇰🇿", ru: "🇷🇺", en: "🇬🇧" }[data.lang] || "";
+  const lines = [
+    "🎉 <b>Жаңа жауап / Новый ответ</b>",
+    "",
+    `👤 <b>Қонақ:</b> ${data.name}`,
+    data.partner ? `💑 <b>Жұбайы:</b> ${data.partner}` : "",
+    `✅ <b>Жауабы:</b> ${data.attendance}`,
+    `${langFlag} <b>Тіл:</b> ${data.lang}`,
+  ].filter(Boolean);
+
+  const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: TG_CHAT_ID,
+        text: lines.join("\n"),
+        parse_mode: "HTML",
+      }),
+    });
+  } catch (err) {
+    console.warn("Telegram notify failed (не критично):", err);
+  }
 };
 
 const submitForm = async () => {
@@ -83,12 +129,18 @@ const submitForm = async () => {
 
     // no-cors: Apps Script не отдаёт CORS-заголовки, поэтому ответ
     // прочитать нельзя, но запрос доходит и строка записывается.
-    await fetch(SHEETS_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload),
-    });
+    // Отправляем и в таблицу, и в Telegram одновременно.
+    // Таблица через no-cors (ответ не читаем, но запись идёт),
+    // Telegram — отдельно, его ошибки не ломают успех формы.
+    await Promise.all([
+      fetch(SHEETS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      }),
+      sendTelegram(payload),
+    ]);
 
     isSent.value = true;
     guestFullName.value = "";
@@ -181,10 +233,22 @@ const showNextImage = () => {
                 />
               </transition>
             </div>
-            <button class="gallery__arrow gallery__arrow--left" type="button"
-              @click="showPrevImage" aria-label="Алдыңғы сурет">‹</button>
-            <button class="gallery__arrow gallery__arrow--right" type="button"
-              @click="showNextImage" aria-label="Келесі сурет">›</button>
+            <button
+              class="gallery__arrow gallery__arrow--left"
+              type="button"
+              @click="showPrevImage"
+              aria-label="Алдыңғы сурет"
+            >
+              ‹
+            </button>
+            <button
+              class="gallery__arrow gallery__arrow--right"
+              type="button"
+              @click="showNextImage"
+              aria-label="Келесі сурет"
+            >
+              ›
+            </button>
           </div>
 
           <!-- Form card -->
@@ -197,14 +261,22 @@ const showNextImage = () => {
             <form class="form" @submit.prevent="submitForm">
               <label class="field">
                 <span class="field__label t-caps">{{ nameLabel }}</span>
-                <input v-model.trim="guestFullName" class="field__input"
-                  type="text" required />
+                <input
+                  v-model.trim="guestFullName"
+                  class="field__input"
+                  type="text"
+                  required
+                />
               </label>
 
               <label class="field">
                 <span class="field__label t-caps">{{ partnerLabel }}</span>
-                <input v-model.trim="partnerName" class="field__input"
-                  type="text" :class="{ 'field__input--error': partnerError }" />
+                <input
+                  v-model.trim="partnerName"
+                  class="field__input"
+                  type="text"
+                  :class="{ 'field__input--error': partnerError }"
+                />
                 <span v-if="partnerError" class="field__hint">
                   {{ partnerHint }}
                 </span>
@@ -213,17 +285,30 @@ const showNextImage = () => {
               <div class="field">
                 <span class="field__label t-caps">{{ attendanceLabel }}</span>
                 <div class="radios">
-                  <label class="radio" :class="{ 'radio--on': attendance === 'yes' }">
+                  <label
+                    class="radio"
+                    :class="{ 'radio--on': attendance === 'yes' }"
+                  >
                     <input type="radio" value="yes" v-model="attendance" />
                     <span class="radio__dot"></span>
                     <span class="radio__text">{{ optionYes }}</span>
                   </label>
-                  <label class="radio" :class="{ 'radio--on': attendance === 'with_partner' }">
-                    <input type="radio" value="with_partner" v-model="attendance" />
+                  <label
+                    class="radio"
+                    :class="{ 'radio--on': attendance === 'with_partner' }"
+                  >
+                    <input
+                      type="radio"
+                      value="with_partner"
+                      v-model="attendance"
+                    />
                     <span class="radio__dot"></span>
                     <span class="radio__text">{{ optionWithPartner }}</span>
                   </label>
-                  <label class="radio" :class="{ 'radio--on': attendance === 'no' }">
+                  <label
+                    class="radio"
+                    :class="{ 'radio--on': attendance === 'no' }"
+                  >
                     <input type="radio" value="no" v-model="attendance" />
                     <span class="radio__dot"></span>
                     <span class="radio__text">{{ optionNo }}</span>
@@ -265,7 +350,11 @@ const showNextImage = () => {
   background-position: center;
   background-attachment: fixed;
 }
-@media (max-width: 860px) { .rsvp { background-attachment: scroll; } }
+@media (max-width: 860px) {
+  .rsvp {
+    background-attachment: scroll;
+  }
+}
 
 .rsvp__overlay {
   padding: clamp(56px, 8vw, 110px) 20px;
@@ -281,7 +370,11 @@ const showNextImage = () => {
 }
 
 /* Countdown */
-.countdown { text-align: center; margin-bottom: clamp(40px, 6vw, 70px); color: #fff; }
+.countdown {
+  text-align: center;
+  margin-bottom: clamp(40px, 6vw, 70px);
+  color: #fff;
+}
 .countdown__label {
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 20px;
@@ -291,7 +384,9 @@ const showNextImage = () => {
   align-items: flex-start;
   gap: clamp(10px, 2vw, 26px);
 }
-.countdown__item { min-width: 64px; }
+.countdown__item {
+  min-width: 64px;
+}
 .countdown__value {
   font-family: var(--font-serif);
   font-weight: 500;
@@ -323,7 +418,10 @@ const showNextImage = () => {
   align-items: center;
 }
 @media (min-width: 900px) {
-  .rsvp__grid { grid-template-columns: 1fr 1fr; align-items: stretch; }
+  .rsvp__grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+  }
 }
 
 /* Gallery */
@@ -341,12 +439,17 @@ const showNextImage = () => {
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: var(--shadow-card);
 }
-.gallery__image { width: 100%; height: 100%; object-fit: cover; }
+.gallery__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .gallery__arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px; height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
   color: var(--ink);
@@ -354,14 +457,26 @@ const showNextImage = () => {
   display: grid;
   place-items: center;
   box-shadow: var(--shadow-soft);
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
-.gallery__arrow:hover { background: #fff; }
-.gallery__arrow--left { left: max(8px, calc(50% - 240px - 22px)); }
-.gallery__arrow--right { right: max(8px, calc(50% - 240px - 22px)); }
+.gallery__arrow:hover {
+  background: #fff;
+}
+.gallery__arrow--left {
+  left: max(8px, calc(50% - 240px - 22px));
+}
+.gallery__arrow--right {
+  right: max(8px, calc(50% - 240px - 22px));
+}
 @media (max-width: 560px) {
-  .gallery__arrow--left { left: 8px; }
-  .gallery__arrow--right { right: 8px; }
+  .gallery__arrow--left {
+    left: 8px;
+  }
+  .gallery__arrow--right {
+    right: 8px;
+  }
 }
 
 /* Form card */
@@ -379,18 +494,32 @@ const showNextImage = () => {
   font-size: clamp(24px, 3.2vw, 34px);
   margin-bottom: 16px;
 }
-.divider { margin-bottom: 16px; }
+.divider {
+  margin-bottom: 16px;
+}
 .card__subtitle {
   font-size: clamp(15px, 1.6vw, 18px);
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.card__deadline { color: var(--gold-deep); margin: 12px 0 28px; }
+.card__deadline {
+  color: var(--gold-deep);
+  margin: 12px 0 28px;
+}
 
-.form { display: grid; gap: 22px; text-align: left; }
-.field { display: grid; gap: 8px; }
-.field__label { font-size: 12px; }
+.form {
+  display: grid;
+  gap: 22px;
+  text-align: left;
+}
+.field {
+  display: grid;
+  gap: 8px;
+}
+.field__label {
+  font-size: 12px;
+}
 .field__input {
   height: 46px;
   padding: 0 4px;
@@ -402,11 +531,23 @@ const showNextImage = () => {
   font-size: 18px;
   transition: border-color 0.2s;
 }
-.field__input:focus { border-color: var(--gold); }
-.field__input--error { border-color: #c0603f; }
-.field__hint { font-family: var(--font-sans); font-size: 11px; color: #c0603f; }
+.field__input:focus {
+  border-color: var(--gold);
+}
+.field__input--error {
+  border-color: #c0603f;
+}
+.field__hint {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: #c0603f;
+}
 
-.radios { display: grid; gap: 12px; margin-top: 4px; }
+.radios {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
 .radio {
   display: flex;
   align-items: center;
@@ -416,19 +557,31 @@ const showNextImage = () => {
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.45);
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
-.radio--on { border-color: var(--gold); background: rgba(184, 148, 77, 0.08); }
-.radio input { position: absolute; opacity: 0; pointer-events: none; }
+.radio--on {
+  border-color: var(--gold);
+  background: rgba(184, 148, 77, 0.08);
+}
+.radio input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
 .radio__dot {
-  width: 18px; height: 18px;
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
   border: 1px solid var(--line);
   flex: 0 0 auto;
   position: relative;
   transition: border-color 0.2s;
 }
-.radio--on .radio__dot { border-color: var(--gold); }
+.radio--on .radio__dot {
+  border-color: var(--gold);
+}
 .radio--on .radio__dot::after {
   content: "";
   position: absolute;
@@ -436,7 +589,11 @@ const showNextImage = () => {
   border-radius: 999px;
   background: var(--gold);
 }
-.radio__text { font-family: var(--font-serif); font-size: 17px; color: var(--ink); }
+.radio__text {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--ink);
+}
 
 .submit {
   height: 52px;
@@ -447,10 +604,17 @@ const showNextImage = () => {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 13px;
-  transition: background 0.25s, transform 0.15s;
+  transition:
+    background 0.25s,
+    transform 0.15s;
 }
-.submit:hover:not(:disabled) { background: var(--gold-deep); transform: translateY(-1px); }
-.submit:disabled { opacity: 0.6; }
+.submit:hover:not(:disabled) {
+  background: var(--gold-deep);
+  transform: translateY(-1px);
+}
+.submit:disabled {
+  opacity: 0.6;
+}
 
 .sent {
   text-align: center;
@@ -459,7 +623,9 @@ const showNextImage = () => {
   color: var(--gold-deep);
   padding: 6px;
 }
-.sent--error { color: #c0603f; }
+.sent--error {
+  color: #c0603f;
+}
 
 .note {
   margin-top: 30px;
@@ -475,6 +641,12 @@ const showNextImage = () => {
   color: var(--ink-soft);
 }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
