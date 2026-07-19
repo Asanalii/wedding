@@ -4,7 +4,7 @@ import finalBackgroundImage from "@/assets/images/final_block.webp";
 const props = defineProps({
   backgroundImage: { type: String, default: finalBackgroundImage },
   topText: { type: String, default: "ҚҰРМЕТПЕН, ТОЙ ИЕЛЕРІ" },
-  namesText: { type: String, default: "Асанәлі - Асан" },
+  namesText: { type: String, default: "Daniyar & Amanat" },
 });
 </script>
 
@@ -12,9 +12,11 @@ const props = defineProps({
   <section class="final" :style="{ '--final-bg': `url('${backgroundImage}')` }">
     <div class="final__overlay">
       <div class="final__content">
-        <div class="final__top invite-title">{{ topText }}</div>
-        <div class="final__names kz-text">{{ namesText }}</div>
-        <div class="final__line"></div>
+        <div class="final__top t-display">{{ topText }}</div>
+        <div class="final__divider">
+          <span></span><i></i><span></span>
+        </div>
+        <div class="final__names t-script">{{ namesText }}</div>
       </div>
     </div>
   </section>
@@ -22,50 +24,52 @@ const props = defineProps({
 
 <style scoped>
 .final {
-  min-height: 28vh;
-  max-height: 320px;
+  min-height: 70vh;
   background-image: var(--final-bg);
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
 }
-
 .final__overlay {
-  min-height: 28vh;
-  max-height: 320px;
+  min-height: 70vh;
   display: grid;
   place-items: center;
-  padding: 46px 16px;
-  background: rgba(0, 0, 0, 0.35);
+  padding: clamp(60px, 10vw, 120px) 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 32, 20, 0.35),
+    rgba(40, 32, 20, 0.55)
+  );
 }
-
 .final__content {
-  width: 100%;
-  max-width: 700px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.95);
+  color: #fff;
+  max-width: 720px;
 }
-
 .final__top {
-  font-size: 22px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 22px;
+  font-size: clamp(14px, 2vw, 20px);
+  letter-spacing: 0.24em;
+  padding-left: 0.24em;
+  opacity: 0.95;
 }
-
+.final__divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 28px auto;
+  width: min(220px, 60%);
+}
+.final__divider span {
+  height: 1px; flex: 1;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+}
+.final__divider i {
+  width: 6px; height: 6px; transform: rotate(45deg);
+  background: var(--gold-soft); flex: 0 0 auto;
+}
 .final__names {
-  margin-top: 80px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(32px, 6vw, 52px);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-.final__line {
-  width: 220px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.65);
-  margin: 0 auto;
+  font-size: clamp(48px, 9vw, 96px);
+  text-shadow: 0 6px 28px rgba(0, 0, 0, 0.4);
+  color: #fff;
 }
 </style>

@@ -15,71 +15,49 @@ const props = defineProps({
   locationTitle: { type: String, default: "МЕКЕНЖАЙЫ" },
   locationName: { type: String, default: '"Resident Ballroom" мейрамханасы' },
   locationAddress: { type: String, default: "Желтоқсан көшесі 23, Алматы қ." },
-
   flowerImage: { type: String, default: whiteFlowersImage },
-
   twoGisImage: { type: String, default: twoGisImage },
-  twoGisLink: {
-    type: String,
-    default: "https://2gis.kz/taraz/firm/70000001090131741",
-  },
+  twoGisLink: { type: String, default: "https://2gis.kz/almaty" },
 });
 
 const weekdays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
+const kzMonths = [
+  "қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым",
+  "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан",
+];
 
 const eventDate = computed(() => new Date(props.eventIso));
-
 const dayNumber = computed(() => eventDate.value.getDate());
 const dayNumberValue = computed(() => dayNumber.value);
-const monthIndex = computed(() => eventDate.value.getMonth()); // 0..11
+const monthIndex = computed(() => eventDate.value.getMonth());
 const year = computed(() => String(eventDate.value.getFullYear()));
-
 const paddedDay = computed(() => String(dayNumber.value).padStart(2, "0"));
-const paddedMonth = computed(() =>
-  String(monthIndex.value + 1).padStart(2, "0"),
-);
+const paddedMonth = computed(() => String(monthIndex.value + 1).padStart(2, "0"));
 
 const time = computed(() => {
-  const hours = String(eventDate.value.getHours()).padStart(2, "0");
-  const minutes = String(eventDate.value.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
+  const h = String(eventDate.value.getHours()).padStart(2, "0");
+  const m = String(eventDate.value.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
 });
 
 function getMondayBasedWeekdayIndex(dateObject) {
-  // JS: 0=Sunday ... 6=Saturday
-  // Нужно: 0=Monday ... 6=Sunday
   const jsDay = dateObject.getDay();
   return (jsDay + 6) % 7;
 }
 
-function getDaysInMonth(yearNumber, monthIndexNumber) {
-  return new Date(yearNumber, monthIndexNumber + 1, 0).getDate();
+function getDaysInMonth(y, m) {
+  return new Date(y, m + 1, 0).getDate();
 }
 
 const calendarCells = computed(() => {
-  const yearNumber = eventDate.value.getFullYear();
-  const firstDayOfMonth = new Date(yearNumber, monthIndex.value, 1);
-
-  const startOffset = getMondayBasedWeekdayIndex(firstDayOfMonth);
-  const totalDays = getDaysInMonth(yearNumber, monthIndex.value);
-
+  const y = eventDate.value.getFullYear();
+  const firstDay = new Date(y, monthIndex.value, 1);
+  const startOffset = getMondayBasedWeekdayIndex(firstDay);
+  const totalDays = getDaysInMonth(y, monthIndex.value);
   const cells = [];
-
-  // пустые ячейки до 1-го числа
-  for (let emptyIndex = 0; emptyIndex < startOffset; emptyIndex += 1) {
-    cells.push(null);
-  }
-
-  // числа месяца
-  for (let currentDay = 1; currentDay <= totalDays; currentDay += 1) {
-    cells.push(currentDay);
-  }
-
-  // добиваем до ровной сетки (6 недель * 7 = 42) чтобы выглядело стабильно
-  while (cells.length < 42) {
-    cells.push(null);
-  }
-
+  for (let i = 0; i < startOffset; i += 1) cells.push(null);
+  for (let d = 1; d <= totalDays; d += 1) cells.push(d);
+  while (cells.length < 42) cells.push(null);
   return cells;
 });
 </script>
@@ -87,336 +65,242 @@ const calendarCells = computed(() => {
 <template>
   <section class="details">
     <div class="details__container">
-      <!-- Заголовок -->
-      <div class="details__titleWrap">
-        <div class="details__line"></div>
-        <h2 class="details__title invite-title">{{ title }}</h2>
-      </div>
+      <header class="details__head">
+        <div class="divider"><span class="divider__gem"></span></div>
+        <h2 class="details__title t-display">{{ title }}</h2>
+        <p class="details__text t-serif">{{ invitationText }}</p>
+      </header>
 
-      <!-- Текст приглашения -->
-      <p class="details__text kz-text">
-        {{ invitationText }}
-      </p>
-
-      <!-- Дата -->
-      <div class="details__dateRow">
-        <span class="details__datePart">{{ paddedDay }}</span>
-        <span class="details__dateSep">|</span>
-        <span class="details__datePart">{{ paddedMonth }}</span>
-        <span class="details__dateSep">|</span>
-        <span class="details__datePart">{{ year }}</span>
-      </div>
-
-      <!-- Время -->
-      <div class="details__time">{{ time }}</div>
-
-      <!-- Календарь -->
-      <div class="calendar">
-        <div class="calendar__topLine"></div>
-
-        <div class="calendar__grid">
-          <div class="calendar__weekdays">
-            <div
-              v-for="weekday in weekdays"
-              :key="weekday"
-              class="calendar__weekday"
-            >
-              {{ weekday }}
-            </div>
+      <div class="details__grid">
+        <!-- LEFT: date + address + flowers -->
+        <div class="details__left">
+          <div class="details__dateRow">
+            <span>{{ paddedDay }}</span>
+            <i></i>
+            <span>{{ paddedMonth }}</span>
+            <i></i>
+            <span>{{ year }}</span>
           </div>
+          <div class="details__time">{{ time }}</div>
 
-          <div class="calendar__days">
-            <div
-              v-for="(dayItem, dayIndex) in calendarCells"
-              :key="dayIndex"
-              class="calendar__day"
-              :class="{
-                'calendar__day--empty': dayItem === null,
-                'calendar__day--selected': dayItem === dayNumberValue,
-              }"
+          <img class="details__flower" :src="flowerImage" alt="" />
+
+          <div class="address">
+            <h3 class="address__title t-display">{{ locationTitle }}</h3>
+            <div class="address__text t-serif">
+              <div>{{ locationName }}</div>
+              <div>{{ locationAddress }}</div>
+            </div>
+            <a
+              class="address__map"
+              :href="twoGisLink"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <span v-if="dayItem !== null" class="calendar__dayNumber">
-                {{ dayItem }}
-              </span>
+              <span class="address__mapPin">◍</span>
+              <span>Картадан қарау</span>
+            </a>
+          </div>
+        </div>
 
-              <!-- Сердечко-рамка (как на скрине) -->
-              <svg
-                v-if="dayItem === dayNumberValue"
-                class="calendar__heartFrame"
-                viewBox="0 0 64 58"
-                aria-hidden="true"
+        <!-- RIGHT: calendar card -->
+        <div class="details__right">
+          <div class="calendar">
+            <div class="calendar__label t-caps">
+              {{ paddedDay }} {{ kzMonths[monthIndex] }} {{ year }}
+            </div>
+            <div class="calendar__weekdays">
+              <div v-for="wd in weekdays" :key="wd" class="calendar__weekday">
+                {{ wd }}
+              </div>
+            </div>
+            <div class="calendar__days">
+              <div
+                v-for="(dayItem, dayIndex) in calendarCells"
+                :key="dayIndex"
+                class="calendar__day"
+                :class="{
+                  'calendar__day--empty': dayItem === null,
+                  'calendar__day--selected': dayItem === dayNumberValue,
+                }"
               >
-                <path
-                  d="M32 54
-           C 18 44, 6 35, 6 22
-           C 6 12, 14 6, 22 6
-           C 27 6, 30 9, 32 12
-           C 34 9, 37 6, 42 6
-           C 50 6, 58 12, 58 22
-           C 58 35, 46 44, 32 54 Z"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linejoin="round"
-                />
-              </svg>
+                <span v-if="dayItem !== null" class="calendar__dayNumber">
+                  {{ dayItem }}
+                </span>
+                <svg
+                  v-if="dayItem === dayNumberValue"
+                  class="calendar__heart"
+                  viewBox="0 0 64 58"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M32 54 C 18 44, 6 35, 6 22 C 6 12, 14 6, 22 6 C 27 6, 30 9, 32 12 C 34 9, 37 6, 42 6 C 50 6, 58 12, 58 22 C 58 35, 46 44, 32 54 Z"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="calendar__bottomLine"></div>
-      </div>
-
-      <!-- Адрес -->
-      <div class="address">
-        <h3 class="address__title invite-title kz-title">
-          {{ locationTitle }}
-        </h3>
-        <div class="address__text kz-text">
-          <div>{{ locationName }}</div>
-          <div>{{ locationAddress }}</div>
-        </div>
-
-        <a
-          class="address__2gisLink"
-          :href="twoGisLink"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img class="address__2gisIcon" :src="twoGisImage" alt="2GIS" />
-        </a>
-
-        <img class="address__flower" :src="flowerImage" alt="" />
-        <!-- <div class="address__flower" aria-hidden="true"></div> -->
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-/* фон как на скрине */
 .details {
-  background: #f6f0e6;
-  padding: 44px 16px 16px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--bg-warm) 0%, var(--bg) 70%);
+  padding: clamp(56px, 8vw, 100px) 20px;
 }
 
 .details__container {
-  max-width: 520px;
+  max-width: var(--page-max);
   margin: 0 auto;
+}
+
+.details__head {
   text-align: center;
+  max-width: 640px;
+  margin: 0 auto clamp(40px, 6vw, 72px);
 }
-
-/* Заголовок */
-.details__titleWrap {
-  display: grid;
-  gap: 10px;
-  justify-items: center;
-  margin-bottom: 18px;
-}
-
-.details__line {
-  width: 140px;
-  height: 1px;
-  background: rgba(0, 0, 0, 0.5);
-}
+.divider { margin-bottom: 22px; }
 
 .details__title {
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: 1px;
-  font-weight: 400;
+  font-size: clamp(24px, 3.4vw, 38px);
+  margin-bottom: 20px;
 }
-
-/* Текст приглашения */
 .details__text {
-  margin: 0 auto 24px;
-  max-width: 420px;
-  line-height: 1.5;
-  font-size: 14px;
-  opacity: 0.85;
+  font-size: clamp(17px, 1.6vw, 21px);
+  color: var(--ink-soft);
 }
 
-/* Дата */
+/* two-column on desktop */
+.details__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(40px, 6vw, 80px);
+  align-items: center;
+}
+@media (min-width: 860px) {
+  .details__grid { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+.details__left { text-align: center; }
+
 .details__dateRow {
   display: flex;
   justify-content: center;
-  align-items: baseline;
-  gap: 10px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 42px;
-  letter-spacing: 1px;
-  margin: 0 0 10px;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(44px, 7vw, 68px);
+  color: var(--ink);
+  line-height: 1;
 }
-
-.details__datePart {
-  min-width: 64px;
+.details__dateRow i {
+  width: 1px; height: 42px;
+  background: var(--line);
 }
-
-.details__dateSep {
-  font-size: 34px;
-  opacity: 0.8;
-}
-
-/* Время */
 .details__time {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 20px;
-  margin-bottom: 18px;
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 2.4vw, 26px);
+  color: var(--gold-deep);
+  letter-spacing: 0.1em;
+  margin-top: 12px;
 }
 
-/* Календарь */
+.details__flower {
+  width: min(320px, 70%);
+  margin: 8px auto 12px;
+  opacity: 0.95;
+  mix-blend-mode: multiply;
+}
+
+.address__title {
+  font-size: clamp(20px, 2.6vw, 28px);
+  margin-bottom: 12px;
+}
+.address__text {
+  font-size: clamp(16px, 1.6vw, 19px);
+  color: var(--ink);
+}
+.address__map {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 20px;
+  padding: 11px 22px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold-deep);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 12px;
+  transition: background 0.25s, color 0.25s;
+}
+.address__map:hover { background: var(--gold); color: #fff; }
+.address__mapPin { font-size: 14px; }
+
+/* Calendar card */
 .calendar {
-  margin: 0 auto 34px;
-  max-width: 380px;
+  background: #fff;
+  border: 1px solid var(--gold-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(22px, 3vw, 34px);
+  max-width: 420px;
+  margin: 0 auto;
 }
-
-.calendar__topLine,
-.calendar__bottomLine {
-  height: 1px;
-  background: rgba(0, 0, 0, 0.45);
-  margin: 14px 0;
+.calendar__label {
+  text-align: center;
+  color: var(--gold-deep);
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--bg-deep);
 }
-
-.calendar__grid {
-  display: grid;
-  gap: 10px;
-}
-
 .calendar__weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  font-size: 12px;
-  opacity: 0.8;
+  margin-bottom: 6px;
 }
-
 .calendar__weekday {
   text-align: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  padding: 6px 0;
 }
-
 .calendar__days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  position: relative;
 }
-
 .calendar__day {
-  height: 34px;
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
   position: relative;
-  font-size: 14px;
+  font-family: var(--font-serif);
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: var(--ink);
 }
-
-.calendar__day--empty {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.calendar__dayNumber {
-  position: relative;
-  z-index: 2;
-}
-
-/* Адрес */
-.address__title {
-  margin: 0 0 10px;
-  font-size: 28px;
-  letter-spacing: 1px;
-  font-weight: 400;
-}
-
-.address__text {
-  font-size: 14px;
-  opacity: 0.85;
-  line-height: 1.5;
-}
-
-.address__flower {
-  width: min(400px, 50vw);
-  max-width: 310px;
-  height: auto;
-  margin: 0 auto;
-  display: block;
-  opacity: 0.95;
-  user-select: none;
-  pointer-events: none;
-  transform: scale(1.06);
-  transform-origin: center;
-}
-
-/* .address__flower {
-  width: min(210px, 54vw);
-  height: auto;
-  margin: 0 auto;
-  display: block;
-  opacity: 0.95;
-  user-select: none;
-  pointer-events: none;
-} */
-
-.calendar__day {
-  height: 34px;
-  display: grid;
-  place-items: center;
-  position: relative;
-  font-size: 14px;
-}
-
-.calendar__dayNumber {
-  position: relative;
-  z-index: 2; /* цифра поверх рамки */
-}
-
-/* рамка-сердце вокруг числа */
-.calendar__heartFrame {
+.calendar__day--empty { opacity: 0; }
+.calendar__day--selected { color: var(--gold-deep); font-weight: 600; }
+.calendar__dayNumber { position: relative; z-index: 2; }
+.calendar__heart {
   position: absolute;
-  width: 34px;
-  height: 30px;
-  left: 50%;
-  bottom: 1px;
-  transform: translateX(-50%);
-  color: rgba(0, 0, 0, 0.85);
+  width: 78%; height: 78%;
+  left: 50%; top: 52%;
+  transform: translate(-50%, -50%);
+  color: var(--gold);
   z-index: 1;
-  pointer-events: none;
-  animation: heartPulse 1.6s ease-in-out infinite;
-  transform-origin: center;
+  animation: heartPulse 1.8s ease-in-out infinite;
 }
-
-.address__2gisLink {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 14px;
-  text-decoration: none;
-}
-
-.address__2gisIcon {
-  width: 120px;
-  height: auto;
-  display: block;
-  user-select: none;
-}
-
-/* пульсация */
 @keyframes heartPulse {
-  0% {
-    transform: translateX(-50%) scale(1);
-  }
-  50% {
-    transform: translateX(-50%) scale(1.18);
-  }
-  100% {
-    transform: translateX(-50%) scale(1);
-  }
-}
-
-.address__2gisLink:hover .address__2gisIcon {
-  transform: scale(1.04);
-}
-
-.address__2gisIcon {
-  transition: transform 180ms ease;
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+  50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
 }
 </style>
